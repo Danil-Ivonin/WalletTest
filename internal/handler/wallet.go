@@ -7,6 +7,7 @@ import (
 	"github.com/Danil-Ivonin/WalletTest/internal/domain"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 func (h *Handler) PostWallet(c *gin.Context) {
@@ -72,7 +73,8 @@ func writeDomainError(c *gin.Context, err error) {
 }
 
 func writeError(c *gin.Context, status int, message string) {
-	c.JSON(status, gin.H{
+	logrus.Error(message)
+	c.AbortWithStatusJSON(status, gin.H{
 		"success": false,
 		"message": message,
 	})
