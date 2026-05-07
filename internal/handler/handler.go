@@ -1,4 +1,4 @@
-package httpadapter
+package handler
 
 import "github.com/Danil-Ivonin/WalletTest/internal/service"
 import "github.com/gin-gonic/gin"

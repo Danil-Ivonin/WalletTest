@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/Danil-Ivonin/WalletTest/internal/adapters/db"
 	"github.com/Danil-Ivonin/WalletTest/internal/domain"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,6 +19,6 @@ type Repository struct {
 
 func NewRepository(pool *pgxpool.Pool) *Repository {
 	return &Repository{
-		Wallet: db.NewWalletRepository(pool),
+		Wallet: NewWalletRepository(pool),
 	}
 }
