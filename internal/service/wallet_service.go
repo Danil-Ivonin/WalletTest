@@ -16,12 +16,21 @@ func NewWalletService(repo repository.Wallet) *WalletService {
 	return &WalletService{repo: repo}
 }
 
-func (w WalletService) ApplyOperation(ctx context.Context, walletID uuid.UUID, opType domain.OperationType, amount int64) (domain.Wallet, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *WalletService) ApplyOperation(ctx context.Context, walletID uuid.UUID, opType domain.OperationType, amount int64) (domain.Wallet, error) {
+	if amount <= 0 {
+		return domain.Wallet{}, domain.ErrInvalidAmount
+	}
+	if err := domain.ValidateOperationType(opType); err != nil {
+		return domain.Wallet{}, err
+	}
+
+	return s.repo.ApplyOperation(ctx, domain.WalletOperation{
+		WalletID: walletID,
+		Type:     opType,
+		Amount:   amount,
+	})
 }
 
-func (w WalletService) GetBalance(ctx context.Context, walletID uuid.UUID) (domain.Wallet, error) {
-	//TODO implement me
-	panic("implement me")
+func (s *WalletService) GetBalance(ctx context.Context, walletID uuid.UUID) (domain.Wallet, error) {
+	return s.repo.GetWallet(ctx, walletID)
 }
