@@ -2,30 +2,19 @@ package db
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/spf13/viper"
 )
 
-type Config struct {
-	Username string
-	Password string
-	Host     string
-	Port     string
-	DBName   string
-	SSLMode  string
-}
-
-func NewPostgres(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
-	config, err := pgxpool.ParseConfig(
-		fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=%s",
-			cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.DBName, cfg.SSLMode))
+func NewPostgres(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
+	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	config.MaxConns = 50
-	config.MinConns = 25
+	config.MaxConns = int32(viper.GetInt("db.max_conns"))
+	config.MinConns = int32(viper.GetInt("db.min_conns"))
 
 	pool, err := pgxpool.NewWithConfig(
 		ctx,
