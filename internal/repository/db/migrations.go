@@ -2,39 +2,37 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
-	"sort"
-	"strings"
 
+	"github.com/golang-migrate/migrate/v4"
+	pgxv5 "github.com/golang-migrate/migrate/v4/database/pgx/v5"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 )
 
 func RunMigrations(ctx context.Context, pool *pgxpool.Pool, dir string) error {
-	entries, err := os.ReadDir(dir)
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	sqlDB := stdlib.OpenDBFromPool(pool)
+	defer sqlDB.Close()
+
+	driver, err := pgxv5.WithInstance(sqlDB, &pgxv5.Config{})
 	if err != nil {
-		return fmt.Errorf("read migrations directory %s: %w", dir, err)
+		return fmt.Errorf("create migration driver: %w", err)
 	}
 
-	var files []string
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".up.sql") {
-			continue
-		}
-		files = append(files, entry.Name())
+	m, err := migrate.NewWithDatabaseInstance("file://"+dir, "postgres", driver)
+	if err != nil {
+		return fmt.Errorf("create migrator: %w", err)
 	}
-	sort.Strings(files)
+	defer m.Close()
 
-	for _, file := range files {
-		path := filepath.Join(dir, file)
-		query, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("read migration %s: %w", path, err)
-		}
-		if _, err := pool.Exec(ctx, string(query)); err != nil {
-			return fmt.Errorf("apply migration %s: %w", path, err)
-		}
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		return fmt.Errorf("apply migrations: %w", err)
 	}
 
 	return nil
