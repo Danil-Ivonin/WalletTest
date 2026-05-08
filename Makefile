@@ -18,10 +18,7 @@ help:
 	@echo "  make up           Start docker compose stack"
 	@echo "  make down         Stop docker compose stack"
 	@echo "  make restart      Restart docker compose stack"
-	@echo "  make logs         Show app logs"
-	@echo "  make ps           Show compose services"
 	@echo "  make load-test    Run k6 load test"
-	@echo "  make clean        Remove local binary"
 
 build:
 	go build -o bin/$(APP_NAME) ./cmd
@@ -45,9 +42,6 @@ down:
 	$(COMPOSE) down
 
 restart: down up
-
-logs:
-	$(COMPOSE) logs -f app
 
 load-test:
 	k6 run -e RATE=$(K6_RATE) -e DURATION=$(K6_DURATION) -e VUS=$(K6_VUS) -e MAX_VUS=$(K6_MAX_VUS) $(K6_SCRIPT)
