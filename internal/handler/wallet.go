@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
 	"github.com/Danil-Ivonin/WalletTest/internal/domain"
+	"github.com/Danil-Ivonin/WalletTest/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -60,15 +62,41 @@ func (h *Handler) GetWalletBalance(c *gin.Context) {
 }
 
 func writeDomainError(c *gin.Context, err error) {
+	writeError(c, statusFromDomainError(err), messageFromDomainError(err))
+}
+
+func statusFromDomainError(err error) int {
 	switch {
 	case errors.Is(err, domain.ErrInvalidAmount), errors.Is(err, domain.ErrInvalidOperationType):
-		writeError(c, http.StatusBadRequest, err.Error())
+		return http.StatusBadRequest
 	case errors.Is(err, domain.ErrWalletNotFound):
-		writeError(c, http.StatusNotFound, err.Error())
-	case errors.Is(err, domain.ErrInsufficientFunds):
-		writeError(c, http.StatusConflict, err.Error())
+		return http.StatusNotFound
+	case errors.Is(err, domain.ErrInsufficientFunds), errors.Is(err, domain.ErrBalanceOverflow):
+		return http.StatusConflict
+	case errors.Is(err, service.ErrWalletQueueFull), errors.Is(err, context.DeadlineExceeded):
+		return http.StatusTooManyRequests
+	case errors.Is(err, context.Canceled):
+		return http.StatusRequestTimeout
 	default:
-		writeError(c, http.StatusInternalServerError, "internal server error")
+		return http.StatusInternalServerError
+	}
+}
+
+func messageFromDomainError(err error) string {
+	switch {
+	case errors.Is(err, domain.ErrInvalidAmount),
+		errors.Is(err, domain.ErrInvalidOperationType),
+		errors.Is(err, domain.ErrWalletNotFound),
+		errors.Is(err, domain.ErrInsufficientFunds),
+		errors.Is(err, domain.ErrBalanceOverflow),
+		errors.Is(err, service.ErrWalletQueueFull):
+		return err.Error()
+	case errors.Is(err, context.Canceled):
+		return "request canceled"
+	case errors.Is(err, context.DeadlineExceeded):
+		return "request deadline exceeded"
+	default:
+		return "internal server error"
 	}
 }
 

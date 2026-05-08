@@ -19,6 +19,7 @@ var (
 	ErrInvalidOperationType = errors.New("operation type must be DEPOSIT or WITHDRAW")
 	ErrWalletNotFound       = errors.New("wallet not found")
 	ErrInsufficientFunds    = errors.New("insufficient funds")
+	ErrBalanceOverflow      = errors.New("balance overflow")
 )
 
 type Wallet struct {

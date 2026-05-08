@@ -105,12 +105,16 @@ UPDATE wallets
 SET balance = balance + $2,
     updated_at = now()
 WHERE id = $1
+  AND balance <= 9223372036854775807 - $2
 RETURNING id, balance, created_at, updated_at
 `, op.WalletID, op.Amount).Scan(&wallet.ID, &wallet.Balance, &wallet.CreatedAt, &wallet.UpdatedAt)
-	if err != nil {
-		return domain.Wallet{}, fmt.Errorf("deposit wallet %s: %w", op.WalletID, err)
+	if err == nil {
+		return wallet, nil
 	}
-	return wallet, nil
+	if errors.Is(err, pgx.ErrNoRows) {
+		return domain.Wallet{}, domain.ErrBalanceOverflow
+	}
+	return domain.Wallet{}, fmt.Errorf("deposit wallet %s: %w", op.WalletID, err)
 }
 
 func applyWithdraw(ctx context.Context, tx pgx.Tx, op domain.WalletOperation) (domain.Wallet, error) {
