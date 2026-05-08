@@ -4,7 +4,7 @@ app:
   shutdown_timeout: "10s"
   wallet_queue_size: "2048"
 
-db:
+postgres:
   max_conns: "64"
   min_conns: "8"
 

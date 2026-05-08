@@ -28,12 +28,12 @@ func Load(path string) error {
 
 // DSN returns a PostgreSQL connection string
 func DSN() string {
-	return "host=" + viper.GetString("db.host") +
-		" port=" + viper.GetString("db.port") +
-		" user=" + viper.GetString("db.user") +
-		" password=" + viper.GetString("db.password") +
-		" dbname=" + viper.GetString("db.name") +
-		" sslmode=" + viper.GetString("db.sslmode")
+	return "host=" + viper.GetString("postgres.host") +
+		" port=" + viper.GetString("postgres.port") +
+		" user=" + viper.GetString("postgres.user") +
+		" password=" + viper.GetString("postgres.password") +
+		" dbname=" + viper.GetString("postgres.db") +
+		" sslmode=" + viper.GetString("postgres.sslmode")
 }
 
 func HTTPAddr() string {

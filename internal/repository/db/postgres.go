@@ -13,8 +13,8 @@ func NewPostgres(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	config.MaxConns = int32(viper.GetInt("db.max_conns"))
-	config.MinConns = int32(viper.GetInt("db.min_conns"))
+	config.MaxConns = int32(viper.GetInt("postgres.max_conns"))
+	config.MinConns = int32(viper.GetInt("postgres.min_conns"))
 
 	pool, err := pgxpool.NewWithConfig(
 		ctx,

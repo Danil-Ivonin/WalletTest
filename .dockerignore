@@ -1,0 +1,10 @@
+.git
+.idea
+.vscode
+.worktrees
+docs
+*.test
+*.out
+coverage.*
+profile.cov
+README.md
