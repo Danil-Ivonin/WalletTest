@@ -1,7 +1,8 @@
 app:
-  port: "8080"
+  port: "8081"
   log_level: "info"
   shutdown_timeout: "10s"
+  wallet_queue_size: "2048"
 
 db:
   max_conns: "64"

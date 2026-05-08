@@ -6,6 +6,7 @@ import (
 	"github.com/Danil-Ivonin/WalletTest/internal/domain"
 	"github.com/Danil-Ivonin/WalletTest/internal/repository"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 )
 
 type Wallet interface {
@@ -19,6 +20,6 @@ type Service struct {
 
 func NewService(repo *repository.Repository) *Service {
 	return &Service{
-		Wallet: NewWalletService(repo.Wallet),
+		Wallet: NewWalletService(repo.Wallet, viper.GetInt("app.wallet_queue_size")),
 	}
 }

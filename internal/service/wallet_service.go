@@ -9,11 +9,15 @@ import (
 )
 
 type WalletService struct {
-	repo repository.Wallet
+	repo      repository.Wallet
+	processor *WalletProcessor
 }
 
-func NewWalletService(repo repository.Wallet) *WalletService {
-	return &WalletService{repo: repo}
+func NewWalletService(repo repository.Wallet, queueSize int) *WalletService {
+	return &WalletService{
+		repo:      repo,
+		processor: NewWalletProcessor(repo, queueSize),
+	}
 }
 
 func (s *WalletService) ApplyOperation(ctx context.Context, walletID uuid.UUID, opType domain.OperationType, amount int64) (domain.Wallet, error) {
@@ -24,7 +28,7 @@ func (s *WalletService) ApplyOperation(ctx context.Context, walletID uuid.UUID, 
 		return domain.Wallet{}, err
 	}
 
-	return s.repo.ApplyOperation(ctx, domain.WalletOperation{
+	return s.processor.ApplyOperation(ctx, domain.WalletOperation{
 		WalletID: walletID,
 		Type:     opType,
 		Amount:   amount,
